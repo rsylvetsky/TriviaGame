@@ -19,8 +19,8 @@ interface TriviaDao {
     fun delete(trivia: Trivia)
 
     @Query("SELECT * FROM trivia")
-    fun getAllTrivia(): Flow<List<Trivia>>
+    fun getAllTrivia(): LiveData<List<Trivia>>
 
     @Query("SELECT * FROM trivia WHERE status = 'UNANSWERED' ORDER BY RANDOM() LIMIT 1")
-    fun getNextUnansweredTrivia() : Flow<Trivia>
+    fun getNextUnansweredTrivia() : LiveData<Trivia>
 }

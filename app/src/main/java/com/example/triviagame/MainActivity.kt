@@ -1,7 +1,9 @@
 package com.example.triviagame
 
+import android.opengl.Visibility
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.activity.viewModels
@@ -41,7 +43,9 @@ class MainActivity : AppCompatActivity() {
        val answerThree = findViewById<Button>(R.id.answer_3)
        val answerFour = findViewById<Button>(R.id.answer_4)
        val resultMessage = findViewById<TextView>(R.id.result_message)
+       val nextQuestion = findViewById<Button>(R.id.next_question_button)
 
+        
 
         // Create the observer which updates the UI.
         val triviaObserver = Observer<Trivia> { newTrivia ->
@@ -53,9 +57,47 @@ class MainActivity : AppCompatActivity() {
             answerTwo.text = potentialAnswers[1]
             answerThree.text = potentialAnswers[2]
             answerFour.text = potentialAnswers[3]
+
+            answerOne.setOnClickListener {
+                if(answerOne.text == getCorrectAnswer(newTrivia)) {
+                    resultMessage.text = getText(R.string.correct_message)
+                    resultMessage.visibility = View.VISIBLE
+                }else {
+                    resultMessage.text = getText(R.string.incorrect_message)
+                    resultMessage.visibility = View.VISIBLE
+                }
+            }
+
+            answerTwo.setOnClickListener {
+                if(answerTwo.text == getCorrectAnswer(newTrivia)) {
+                    resultMessage.text = getText(R.string.correct_message)
+                    resultMessage.visibility = View.VISIBLE
+                }else {
+                    resultMessage.text = getText(R.string.incorrect_message)
+                    resultMessage.visibility = View.VISIBLE
+                }
+            }
+
+            answerThree.setOnClickListener {
+                if(answerThree.text == getCorrectAnswer(newTrivia)) {
+                    resultMessage.text = getText(R.string.correct_message)
+                    resultMessage.visibility = View.VISIBLE
+                }else {
+                    resultMessage.text = getText(R.string.incorrect_message)
+                    resultMessage.visibility = View.VISIBLE
+                }
+            }
+
+            answerFour.setOnClickListener {
+                if(answerFour.text == getCorrectAnswer(newTrivia)) {
+                    resultMessage.text = getText(R.string.correct_message)
+                    resultMessage.visibility = View.VISIBLE
+                }else {
+                    resultMessage.text = getText(R.string.incorrect_message)
+                    resultMessage.visibility = View.VISIBLE
+                }
+            }
         }
-
-
 
     triviaViewModel.nextUnansweredTrivia.observe(this, triviaObserver)
     }

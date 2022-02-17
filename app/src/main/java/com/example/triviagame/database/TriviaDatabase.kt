@@ -58,6 +58,7 @@ abstract class TriviaDatabase : RoomDatabase() {
                     "trivia_database"
                 )
                     .fallbackToDestructiveMigration()
+                    .allowMainThreadQueries()
                     .addCallback(TriviaDatabaseCallback(scope))
                     .build()
                 INSTANCE = instance

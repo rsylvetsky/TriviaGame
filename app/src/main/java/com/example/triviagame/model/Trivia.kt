@@ -13,7 +13,7 @@ class Trivia(
     val question: String,
     @SerializedName("correct_answer") val correctAnswer: String,
     @SerializedName("incorrect_answers") val incorrectAnswers: ArrayList<String>,
-    var status: TriviaStatus
+    var status: TriviaStatus?
 )
 
 class TriviaWrapper(@SerializedName("response_code")  val responseCode: Int, val results: ArrayList<Trivia> )

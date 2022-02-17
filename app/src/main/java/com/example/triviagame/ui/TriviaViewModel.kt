@@ -7,13 +7,17 @@ import kotlinx.coroutines.launch
 
 class TriviaViewModel(private val repository: TriviaRepository) : ViewModel() {
 
+    init {
+        repository.loadItems()
+    }
+
     // Using LiveData and caching what allWords returns has several benefits:
     // - We can put an observer on the data (instead of polling for changes) and only update the
     //   the UI when the data actually changes.
     // - Repository is completely separated from the UI through the ViewModel.
-    val allTrivia: LiveData<List<Trivia>> = repository.allTrivia.asLiveData()
+    val allTrivia: LiveData<List<Trivia>> = repository.allTrivia
 
-    val nextUnansweredTrivia: LiveData<Trivia> = repository.nextUnansweredTrivia.asLiveData()
+    val nextUnansweredTrivia: LiveData<Trivia> = repository.nextUnansweredTrivia
 
     /**
      * Launching a new coroutine to insert the data in a non-blocking way
@@ -21,6 +25,8 @@ class TriviaViewModel(private val repository: TriviaRepository) : ViewModel() {
     fun insert(trivia: Trivia) = viewModelScope.launch {
         repository.insert(trivia)
     }
+
+
 }
 
 class TriviaViewModelFactory(private val repository: TriviaRepository) : ViewModelProvider.Factory {

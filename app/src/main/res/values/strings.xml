@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">TriviaGame</string>
     <string name="question_title">Question</string>
+    <string name="correct_message">Correct!</string>
+    <string name="incorrect_message">Wrong!</string>
+    <string name="next_question_button">Next Question</string>
 </resources>
