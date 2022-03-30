@@ -1,16 +1,15 @@
 package com.example.triviagame
 
-import android.opengl.Visibility
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.activity.viewModels
+import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import com.example.triviagame.model.Trivia
-import com.example.triviagame.ui.TriviaViewModel
-import com.example.triviagame.ui.TriviaViewModelFactory
+import com.example.triviagame.ui.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -20,15 +19,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun scrambleQuestions(trivia: Trivia) : MutableList<String> {
-        var potentialAnswers: MutableList<String> = mutableListOf()
 
-        potentialAnswers.add(trivia.correctAnswer)
-        trivia.incorrectAnswers.map{ potentialAnswers.add(it)}
-
-        potentialAnswers.shuffle()
-        return potentialAnswers
-    }
 
    //TODO add functionlity to check answer and make buttons work
     //
@@ -45,68 +36,101 @@ class MainActivity : AppCompatActivity() {
        val resultMessage = findViewById<TextView>(R.id.result_message)
        val nextQuestion = findViewById<Button>(R.id.next_question_button)
 
-        
+
+
+        answerOne.setOnClickListener { triviaViewModel.submitAnswer(0) }
+        answerTwo.setOnClickListener {triviaViewModel.submitAnswer(1)  }
+        answerThree.setOnClickListener { triviaViewModel.submitAnswer(2) }
+        answerFour.setOnClickListener { triviaViewModel.submitAnswer(3) }
+
+
+
 
         // Create the observer which updates the UI.
-        val triviaObserver = Observer<Trivia> { newTrivia ->
+        val triviaObserver = Observer<TriviaViewState> { newTrivia ->
             question.text = newTrivia.question
+            answerOne.text = newTrivia.answers[0]
+            answerTwo.text = newTrivia.answers[1]
+            answerThree.text = newTrivia.answers[2]
+            answerFour.text = newTrivia.answers[3]
 
-            val potentialAnswers = scrambleQuestions(newTrivia)
-
-            answerOne.text = potentialAnswers[0]
-            answerTwo.text = potentialAnswers[1]
-            answerThree.text = potentialAnswers[2]
-            answerFour.text = potentialAnswers[3]
-
-            answerOne.setOnClickListener {
-                if(answerOne.text == getCorrectAnswer(newTrivia)) {
-                    resultMessage.text = getText(R.string.correct_message)
+            when (newTrivia.answerState) {
+                AnswerState.AnsweredCorrectly -> {
                     resultMessage.visibility = View.VISIBLE
-                }else {
-                    resultMessage.text = getText(R.string.incorrect_message)
-                    resultMessage.visibility = View.VISIBLE
+                    resultMessage.text = "Correct"
                 }
-            }
-
-            answerTwo.setOnClickListener {
-                if(answerTwo.text == getCorrectAnswer(newTrivia)) {
-                    resultMessage.text = getText(R.string.correct_message)
+                AnswerState.AnsweredIncorrectly -> {
                     resultMessage.visibility = View.VISIBLE
-                }else {
-                    resultMessage.text = getText(R.string.incorrect_message)
-                    resultMessage.visibility = View.VISIBLE
+                    resultMessage.text = "Try again"
                 }
-            }
-
-            answerThree.setOnClickListener {
-                if(answerThree.text == getCorrectAnswer(newTrivia)) {
-                    resultMessage.text = getText(R.string.correct_message)
-                    resultMessage.visibility = View.VISIBLE
-                }else {
-                    resultMessage.text = getText(R.string.incorrect_message)
-                    resultMessage.visibility = View.VISIBLE
-                }
-            }
-
-            answerFour.setOnClickListener {
-                if(answerFour.text == getCorrectAnswer(newTrivia)) {
-                    resultMessage.text = getText(R.string.correct_message)
-                    resultMessage.visibility = View.VISIBLE
-                }else {
-                    resultMessage.text = getText(R.string.incorrect_message)
-                    resultMessage.visibility = View.VISIBLE
+                else -> {
+                    resultMessage.visibility = View.GONE
                 }
             }
         }
 
-    triviaViewModel.nextUnansweredTrivia.observe(this, triviaObserver)
+        triviaViewModel.viewState.observe(this, triviaObserver)
+
+
+
+//            question.text = newTrivia.question
+//
+//            val potentialAnswers = scrambleQuestions(newTrivia)
+//
+//            answerOne.text = potentialAnswers[0]
+//            answerTwo.text = potentialAnswers[1]
+//            answerThree.text = potentialAnswers[2]
+//            answerFour.text = potentialAnswers[3]
+//
+
+
+
+//        answerOne.setOnClickListener {
+//
+//                //different ways, enum, pass 0
+//                triviaViewModel.submitAnswer(0)
+//
+//
+//                if(answerOne.text == getCorrectAnswer(newTrivia)) {
+//                    resultMessage.text = getText(R.string.correct_message)
+//                    resultMessage.visibility = View.VISIBLE
+//                }else {
+//                    resultMessage.text = getText(R.string.incorrect_message)
+//                    resultMessage.visibility = View.VISIBLE
+//                }
+//            }
+//
+//            answerTwo.setOnClickListener {
+//                if(answerTwo.text == getCorrectAnswer(newTrivia)) {
+//                    resultMessage.text = getText(R.string.correct_message)
+//                    resultMessage.visibility = View.VISIBLE
+//                }else {
+//                    resultMessage.text = getText(R.string.incorrect_message)
+//                    resultMessage.visibility = View.VISIBLE
+//                }
+//            }
+//
+//            answerThree.setOnClickListener {
+//                if(answerThree.text == getCorrectAnswer(newTrivia)) {
+//                    resultMessage.text = getText(R.string.correct_message)
+//                    resultMessage.visibility = View.VISIBLE
+//                }else {
+//                    resultMessage.text = getText(R.string.incorrect_message)
+//                    resultMessage.visibility = View.VISIBLE
+//                }
+//            }
+//
+//            answerFour.setOnClickListener {
+//                if(answerFour.text == getCorrectAnswer(newTrivia)) {
+//                    resultMessage.text = getText(R.string.correct_message)
+//                    resultMessage.visibility = View.VISIBLE
+//                }else {
+//                    resultMessage.text = getText(R.string.incorrect_message)
+//                    resultMessage.visibility = View.VISIBLE
+//                }
+//            }
+//        }
     }
 
 
-
-
-
-    fun getCorrectAnswer(trivia: Trivia): String {
-        return trivia.correctAnswer
-    }
 }

@@ -3,6 +3,7 @@ package com.example.triviagame.repo
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
+import androidx.lifecycle.map
 import com.example.triviagame.api.ApiClient
 import com.example.triviagame.api.TriviaApi
 import com.example.triviagame.database.TriviaDao
