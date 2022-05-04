@@ -8,6 +8,7 @@ import com.example.triviagame.api.ApiClient
 import com.example.triviagame.api.TriviaApi
 import com.example.triviagame.database.TriviaDao
 import com.example.triviagame.model.Trivia
+import com.example.triviagame.model.TriviaStatus
 import com.example.triviagame.model.TriviaWrapper
 import kotlinx.coroutines.flow.Flow
 import retrofit2.Call
@@ -28,9 +29,10 @@ class TriviaRepository(private val triviaDao: TriviaDao) {
 
     val nextUnansweredTrivia: LiveData<Trivia> = triviaDao.getNextUnansweredTrivia()
 
+
     //TODO add in network failure stuff use CoRoutines
     //retrofit rxjava subscribeOnIO thread
-    // CoRoutines KOtlin thing
+    // CoRoutines Kotlin thing
     fun loadItems() {
         // get from network
         triviaApi.getTrivia().enqueue(object : Callback<TriviaWrapper> {
@@ -42,7 +44,9 @@ class TriviaRepository(private val triviaDao: TriviaDao) {
                 if (response.isSuccessful) {
 
                     // When data is available, populate LiveData
-                    response.body()?.results?.forEach { trivia -> triviaDao.insert(trivia) }
+                    response.body()?.results?.forEach { trivia ->
+                        trivia.status = TriviaStatus.UNANSWERED
+                        triviaDao.insert(trivia) }
                 }
             }
 
@@ -50,10 +54,6 @@ class TriviaRepository(private val triviaDao: TriviaDao) {
                 t.printStackTrace()
             }
         })
-        //load from local
-//            val loadFromLocal = triviaDao.getAllItem()
-//
-//            emitSource(loadFromLocal)
     }
 
     // By default Room runs suspend queries off the main thread, therefore, we don't need to
@@ -63,5 +63,13 @@ class TriviaRepository(private val triviaDao: TriviaDao) {
     @WorkerThread
     suspend fun insert(trivia: Trivia) {
         triviaDao.insert(trivia)
+    }
+
+    fun updateStatus(triviaId: Long, triviaStatus: TriviaStatus) {
+        triviaDao.updateStatus(triviaId, triviaStatus)
+    }
+
+    fun update(trivia: Trivia) {
+        triviaDao.update(trivia)
     }
 }

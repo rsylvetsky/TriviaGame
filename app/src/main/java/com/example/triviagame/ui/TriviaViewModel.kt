@@ -1,30 +1,40 @@
 package com.example.triviagame.ui
 
 import androidx.lifecycle.*
+import com.airbnb.mvrx.MavericksViewModel
+import com.airbnb.mvrx.MavericksViewModelFactory
+import com.airbnb.mvrx.ViewModelContext
+import com.example.triviagame.TriviaApplication
 import com.example.triviagame.model.Trivia
+import com.example.triviagame.model.TriviaStatus
 import com.example.triviagame.repo.TriviaRepository
 import kotlinx.coroutines.launch
 
-class TriviaViewModel(private val repository: TriviaRepository) : ViewModel() {
-    // VS activity will listen to
-    //add methods that will publish to this VS
-    private var trivia: LiveData<Trivia>
-    var viewState : MutableLiveData<TriviaViewState> = MutableLiveData()
+class TriviaViewModel(initialState: TriviaViewState, private val repository: TriviaRepository) :
+    MavericksViewModel<TriviaViewState>(initialState) {
 
-    init {
-        repository.loadItems()
-        trivia = repository.nextUnansweredTrivia
-        initializeViewState(trivia)
+    companion object : MavericksViewModelFactory<TriviaViewModel, TriviaViewState> {
+
+        override fun create(
+            viewModelContext: ViewModelContext,
+            state: TriviaViewState
+        ): TriviaViewModel {
+            val repository: TriviaRepository = viewModelContext.app<TriviaApplication>().repository
+            return TriviaViewModel(state, repository)
+        }
     }
 
-    // Using LiveData and caching what allWords returns has several benefits:
-    // - We can put an observer on the data (instead of polling for changes) and only update the
-    //   the UI when the data actually changes.
-    // - Repository is completely separated from the UI through the ViewModel.
-    val allTrivia: LiveData<List<Trivia>> = repository.allTrivia
+    private var trivia: LiveData<Trivia> = repository.nextUnansweredTrivia
 
+    init {
+        repository.loadItems() //move this into background job every so often, put itto application initializer,
+        initializeViewState()
 
-
+//        suspend {
+//            repository.nextUnansweredTrivia
+//        }.execute { copy( //update things to async<trivia> type ) }
+//    }
+    }
 
     /**
      * Launching a new coroutine to insert the data in a non-blocking way
@@ -33,53 +43,65 @@ class TriviaViewModel(private val repository: TriviaRepository) : ViewModel() {
         repository.insert(trivia)
     }
 
-    private fun initializeViewState(trivia: LiveData<Trivia>) {
+    fun update(trivia: Trivia) = viewModelScope.launch {
+        repository.update(trivia)
+    }
+
+    fun initializeViewState() {
 //transform livedata trivia to livedata of VS
-       Transformations.map(trivia) {triv ->
-           val allAnswers = scrambleQuestions(triv)
-           TriviaViewState(triv.question, allAnswers, triv.correctAnswer, AnswerState.Unanswered)
-       }.observeForever{
-           viewState.value = it
-       }
-        //initial vs says, when we get the trivia ld from db, scramble the questions. then once we do this processing, update the vs
+
+        Transformations.map(trivia) { triv ->
+            val allAnswers = scrambleQuestions(triv)
+            TriviaViewState(
+                triv.id,
+                triv.question,
+                allAnswers,
+                triv.correctAnswer,
+                TriviaStatus.UNANSWERED
+            )
+        }.observeForever {
+            setState {
+                copy(
+                    id = it.id,
+                    question = it.question,
+                    answers = it.answers,
+                    correctAnswer = it.correctAnswer,
+                    answerState = it.answerState
+                )
+            }
+        }
+
     }
 
     fun submitAnswer(index: Int) {
-        //whenever you want to update the vs you can use this and pass whatever you want
-        if (viewState.value!!.answers[index] == viewState.value!!.correctAnswer) {
-            viewState.value = viewState.value!!.copy(
-                answerState = AnswerState.AnsweredCorrectly
-            )
 
-        } else {
-            viewState.value = viewState.value!!.copy(
-                answerState = AnswerState.AnsweredIncorrectly
-            )
+        withState { state ->
+            if (state.answers[index] == state.correctAnswer) {
+                setState {
+                    copy(
+                        answerState = TriviaStatus.ANSWERED_CORRECTLY
+                    )
+                }
+                repository.updateStatus(state.id, TriviaStatus.ANSWERED_CORRECTLY)
+
+            } else {
+                setState {
+                    copy(
+                        answerState = TriviaStatus.ANSWERED_INCORRECTLY
+                    )
+                }
+                repository.updateStatus(state.id, TriviaStatus.ANSWERED_INCORRECTLY)
+            }
         }
-
-
     }
-
-    //next question should do something to the VM, get the data from the repo and update the vs
-    //fetch a new question object through the db, do something similar to the viewstate,
 }
 
-private fun scrambleQuestions(trivia: Trivia) : MutableList<String> {
+private fun scrambleQuestions(trivia: Trivia): MutableList<String> {
     var potentialAnswers: MutableList<String> = mutableListOf()
 
     potentialAnswers.add(trivia.correctAnswer)
-    trivia.incorrectAnswers.map{ potentialAnswers.add(it)}
+    trivia.incorrectAnswers.map { potentialAnswers.add(it) }
 
     potentialAnswers.shuffle()
     return potentialAnswers
-}
-
-class TriviaViewModelFactory(private val repository: TriviaRepository) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(TriviaViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return TriviaViewModel(repository) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
 }

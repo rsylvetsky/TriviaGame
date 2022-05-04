@@ -6,7 +6,7 @@ import retrofit2.http.GET
 
 interface TriviaApi {
 
-    @GET("api.php?amount=100&category=12&difficulty=easy&type=multiple")
+    @GET("api.php?amount=100x&category=12&difficulty=easy&type=multiple")
     fun getTrivia(): Call<TriviaWrapper>
 
 }

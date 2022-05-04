@@ -1,5 +1,6 @@
 package com.example.triviagame.model
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
@@ -13,7 +14,7 @@ class Trivia(
     val question: String,
     @SerializedName("correct_answer") val correctAnswer: String,
     @SerializedName("incorrect_answers") val incorrectAnswers: ArrayList<String>,
-    var status: TriviaStatus?
+    @ColumnInfo(defaultValue = "unanswered") var status: TriviaStatus
 )
 
 class TriviaWrapper(@SerializedName("response_code")  val responseCode: Int, val results: ArrayList<Trivia> )

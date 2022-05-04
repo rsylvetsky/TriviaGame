@@ -4,4 +4,6 @@
     <string name="correct_message">Correct!</string>
     <string name="incorrect_message">Wrong!</string>
     <string name="next_question_button">Next Question</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

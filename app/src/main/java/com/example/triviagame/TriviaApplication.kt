@@ -1,6 +1,7 @@
 package com.example.triviagame
 
 import android.app.Application
+import com.airbnb.mvrx.Mavericks
 import com.example.triviagame.database.TriviaDatabase
 import com.example.triviagame.repo.TriviaRepository
 import kotlinx.coroutines.CoroutineScope
@@ -15,4 +16,9 @@ class TriviaApplication : Application() {
     // rather than when the application starts
     val database by lazy { TriviaDatabase.getDatabase(this, applicationScope) }
     val repository by lazy { TriviaRepository(database.triviaDao()) }
+
+    override fun onCreate() {
+        super.onCreate()
+        Mavericks.initialize(this)
+    }
 }
