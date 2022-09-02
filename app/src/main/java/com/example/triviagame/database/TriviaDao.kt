@@ -26,5 +26,5 @@ interface TriviaDao {
     fun getAllTrivia(): LiveData<List<Trivia>>
 
     @Query("SELECT * FROM trivia WHERE status = 'unanswered' ORDER BY RANDOM() LIMIT 1")
-    suspend fun getNextUnansweredTrivia() : Trivia
+    fun getNextUnansweredTrivia() : LiveData<Trivia>
 }

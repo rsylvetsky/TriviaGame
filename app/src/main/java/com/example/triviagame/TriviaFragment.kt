@@ -55,6 +55,7 @@ class TriviaFragment : Fragment(R.layout.fragment_trivia), MavericksView {
         answerTwo?.setOnClickListener {triviaViewModel.submitAnswer(1)  }
         answerThree?.setOnClickListener { triviaViewModel.submitAnswer(2) }
         answerFour?.setOnClickListener { triviaViewModel.submitAnswer(3) }
+        nextQuestion?.setOnClickListener { triviaViewModel.submitAnswer(4) }
 
     }
     override fun invalidate() {
@@ -76,6 +77,10 @@ class TriviaFragment : Fragment(R.layout.fragment_trivia), MavericksView {
                 TriviaStatus.ANSWERED_INCORRECTLY -> {
                     resultMessage?.visibility = View.VISIBLE
                     resultMessage?.text = "Try again"
+                }
+                TriviaStatus.SKIPPED -> {
+                    resultMessage?.visibility = View.VISIBLE
+                    resultMessage?.text = "Skipped"
                 }
                 else -> {
                     resultMessage?.visibility = View.GONE

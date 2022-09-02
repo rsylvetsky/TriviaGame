@@ -27,7 +27,7 @@ class TriviaViewModel(initialState: TriviaViewState, private val repository: Tri
     private var trivia: LiveData<Trivia> = repository.nextUnansweredTrivia
 
     init {
-        repository.loadItems() //move this into background job every so often, put itto application initializer,
+        repository.loadItems() //move this into background job every so often, put into application initializer,
         initializeViewState()
 
 //        suspend {
@@ -76,7 +76,15 @@ class TriviaViewModel(initialState: TriviaViewState, private val repository: Tri
     fun submitAnswer(index: Int) {
 
         withState { state ->
-            if (state.answers[index] == state.correctAnswer) {
+            if (index == 4) {
+                setState {
+                    copy(
+                        answerState = TriviaStatus.SKIPPED
+                    )
+                }
+                repository.updateStatus(state.id, TriviaStatus.SKIPPED)
+            }
+            else if (state.answers[index] == state.correctAnswer) {
                 setState {
                     copy(
                         answerState = TriviaStatus.ANSWERED_CORRECTLY
